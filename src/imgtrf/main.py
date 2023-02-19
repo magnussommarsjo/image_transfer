@@ -1,5 +1,5 @@
 from pathlib import Path
-from utils import copy_files, DateDepth
+from src.imgtrf.core import copy_files, DateDepth
 
 import logging
 
