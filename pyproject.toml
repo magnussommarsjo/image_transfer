@@ -6,7 +6,8 @@ build-backend = "setuptools.build_meta"
 name = "imgtrf"
 version = "0.0.1"
 dependencies = [
-    "typer[all]"
+    "typer[all]",
+    "rich"
 ]
 readme = "README.md"
 
