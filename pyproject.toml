@@ -8,4 +8,7 @@ version = "0.0.1"
 dependencies = [
     "typer[all]"
 ]
+readme = "README.md"
 
+[project.scripts]
+imgtrf = "imgtrf.__main__:app"
