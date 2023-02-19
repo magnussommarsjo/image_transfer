@@ -18,16 +18,16 @@ def walk(root: str) -> Iterator[Path]:
         yield path
 
 
-def _copy_file(source_path: Path, target_path: Path) -> None:
+def _copy_file(src_file_path: Path, dest_path: Path) -> None:
     """Copies file from source to target path"""
-    target_path.parent.mkdir(parents=True, exist_ok=True)
-    shutil.copy2(source_path, target_path)
+    dest_path.parent.mkdir(parents=True, exist_ok=True)
+    shutil.copy2(src_file_path, dest_path)
 
 
-def _move_file(source_path: Path, target_path: Path) -> None:
+def _move_file(src_file_path: Path, dest_path: Path) -> None:
     """Moves file from source to target path"""
-    target_path.parent.mkdir(parents=True, exist_ok=True)
-    shutil.move(source_path, target_path)
+    dest_path.parent.mkdir(parents=True, exist_ok=True)
+    shutil.move(src_file_path, dest_path)
 
 
 class DateDepth(Enum):
@@ -37,41 +37,45 @@ class DateDepth(Enum):
 
 
 def create_path_based_on_creation_date(
-    file_path: Path, target_dir: Path, date_depth: DateDepth
+    src_file_path: Path, dest_dir: Path, date_depth: DateDepth
 ) -> Path:
     """Returns path based on creation date of file"""
-    timestamp = file_path.stat().st_mtime
+    timestamp = src_file_path.stat().st_mtime
     date = datetime.date.fromtimestamp(timestamp)
 
     match date_depth:
         case DateDepth.YEAR:
-            target_path = target_dir.joinpath(str(date.year), file_path.name)
+            target_path = dest_dir.joinpath(str(date.year), src_file_path.name)
         case DateDepth.MONTH:
-            target_path = target_dir.joinpath(
-                str(date.year), f"{date.month:02d}", file_path.name
+            target_path = dest_dir.joinpath(
+                str(date.year), f"{date.month:02d}", src_file_path.name
             )
         case DateDepth.DAY:
-            target_path = target_dir.joinpath(
-                str(date.year), f"{date.month:02d}", f"{date.day:02d}", file_path.name
+            target_path = dest_dir.joinpath(
+                str(date.year), f"{date.month:02d}", f"{date.day:02d}", src_file_path.name
             )
 
     return target_path
 
 
 def copy_files(
-    source_dir: Path,
-    target_dir: Path,
+    src_dir: Path,
+    dest_dir: Path,
     date_depth: DateDepth = DateDepth.DAY,
     skip_existing=True,
 ) -> None:
     """Copies files from source to target directory"""
-    for file_path in walk(source_dir):
+    src_dest_paths: list[tuple[str, str]] = []
+    for src_file_path in walk(src_dir):
         target_path = create_path_based_on_creation_date(
-            file_path, target_dir, date_depth=date_depth
+            src_file_path, dest_dir, date_depth=date_depth
         )
         if skip_existing and target_path.exists():
-            log.info(f"Skipping {file_path}")
+            log.info(f"Skipping {src_file_path}")
             continue
         else:
-            log.info(f"Copying {file_path} to {target_path}")
-            _copy_file(file_path, target_path)
+            src_dest_paths.append((src_file_path, target_path))
+
+    for src_file_path, target_path in src_dest_paths:
+        log.info(f"Copying {src_file_path} to {target_path}")
+        _copy_file(src_file_path, target_path)
