@@ -5,11 +5,22 @@ build-backend = "setuptools.build_meta"
 [project]
 name = "imgtrf"
 version = "0.0.1"
+requires-python = ">=3.10"
 dependencies = [
     "typer[all]",
     "rich"
 ]
 readme = "README.md"
 
+[project.optional-dependencies]
+dev = [
+    "pytest>=6.0",
+    "black",
+]
+
 [project.scripts]
 imgtrf = "imgtrf.__main__:app"
+
+[tool.pytest.ini_options]
+minversion = "6.0"
+testpaths = ["tests"]
