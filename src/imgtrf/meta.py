@@ -123,21 +123,3 @@ def _is_image(path: Path) -> bool:
 def _is_video(path: Path) -> bool:
     ext = path.suffix.lower()[1:]
     return ext in VIDEO_EXT
-
-
-if __name__ == "__main__":
-    # Bsic logging
-    log.setLevel(logging.DEBUG)
-    stream_handler = logging.StreamHandler()
-    log.addHandler(stream_handler)
-
-    from rich.pretty import pprint
-
-    # pprint(TAGS)
-    # pprint(get_image_meta("./tmp/image.JPG"))
-
-    pprint(get_video_meta(Path("./tmp/video.MP4")))
-
-    pprint(get_creation_time(Path("./tmp/video.MP4")))
-
-    pprint(get_creation_time(Path("./tmp/image.JPG")))
