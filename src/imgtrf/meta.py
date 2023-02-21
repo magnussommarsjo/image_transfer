@@ -11,8 +11,8 @@ from imgtrf.logger import log_func, root_logger as log
 
 
 # Supported formats
-IMAGE_EXT = ("jpg", "jpeg" "png")
-VIDEO_EXT = "mp4"
+IMAGE_EXT = {"jpg", "jpeg" "png"}
+VIDEO_EXT = {"mp4"}
 
 
 def get_creation_time(path: Path) -> datetime | None:
