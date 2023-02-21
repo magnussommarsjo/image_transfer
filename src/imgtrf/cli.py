@@ -1,15 +1,15 @@
-import typer
-from imgtrf.core import copy_files, move_files, DateDepth
 from pathlib import Path
 import logging
 
+import typer
 from rich import print
 
-from imgtrf.logger import root_logger as log
+from imgtrf.logger import root_logger
+from imgtrf.core import copy_files, move_files, DateDepth
 
 # Set up logging
-stream_handler = logging.StreamHandler()
-log.addHandler(stream_handler)
+log = logging.getLogger(__name__)
+root_logger.addHandler(logging.StreamHandler())
 
 app = typer.Typer()
 
@@ -74,9 +74,10 @@ def move(
     move_files(src_dir=source_path, dest_dir=destination_path, date_depth=date_depth)
 
 
+
 def _set_log_level(verbose: bool = False, debug: bool = False):
     if verbose:
-        log.setLevel(logging.INFO)
+        root_logger.setLevel(logging.INFO)
 
     if debug:
-        log.setLevel(logging.DEBUG)
+        root_logger.setLevel(logging.DEBUG)

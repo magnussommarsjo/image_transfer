@@ -5,9 +5,10 @@ import shutil
 
 from rich import progress
 
-from imgtrf.logger import root_logger as log
+import logging
 from imgtrf import meta
 
+log = logging.getLogger(__name__)
 
 def walk(root: str) -> Iterator[Path]:
     """Recureivly iterates through directories and yields file paths"""

@@ -7,7 +7,9 @@ from PIL import Image
 from PIL.ExifTags import TAGS
 
 import logging
-from imgtrf.logger import log_func, root_logger as log
+from imgtrf.logger import log_func
+
+log = logging.getLogger(__name__)
 
 
 # Supported formats
@@ -48,7 +50,7 @@ def get_creation_time(path: Path) -> datetime | None:
     return creation_time
 
 
-@log_func()
+@log_func(log)
 def get_image_creation_time(path: Path) -> datetime | None:
     """Returns creation time if exists in image metadata"""
     metadata = get_image_meta(path)
@@ -58,7 +60,7 @@ def get_image_creation_time(path: Path) -> datetime | None:
     return creation_time
 
 
-@log_func()
+@log_func(log)
 def get_video_creation_time(path: Path) -> datetime | None:
     metadata = get_video_meta(path)
 
@@ -77,7 +79,7 @@ def get_video_creation_time(path: Path) -> datetime | None:
             return datetime.fromisoformat(time_string)
 
 
-@log_func()
+@log_func(log)
 def get_win_creation_time(path: Path) -> datetime:
     """Get creation time from windows file
 
