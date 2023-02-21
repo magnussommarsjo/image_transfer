@@ -61,7 +61,21 @@ def get_image_creation_time(path: Path) -> datetime | None:
 
 @log_func()
 def get_video_creation_time(path: Path) -> datetime | None:
-    pass
+    metadata = get_video_meta(path)
+
+    # Look at 'creation_time' in 'format'
+    creation_time: datetime = None
+    time_string = metadata.get("format", {}).get("tags", {}).get("creation_time", None)
+    if time_string is not None:
+        return datetime.fromisoformat(time_string)
+
+    # Look at 'creation_time' in streams/tags
+    streams: list[dict] = metadata.get("streams", [])
+    if streams:
+        # TODO: streams consists of both video and audio. Loop through?
+        time_string = streams[0].get("tags", {}).get("creation_time")
+        if time_string is not None:
+            return datetime.fromisoformat(time_string)
 
 
 @log_func()
@@ -113,5 +127,8 @@ if __name__ == "__main__":
     # pprint(TAGS)
     # pprint(get_image_meta("./tmp/image.JPG"))
 
+    pprint(get_video_meta(Path("./tmp/video.MP4")))
+
     pprint(get_creation_time(Path("./tmp/video.MP4")))
+
     pprint(get_creation_time(Path("./tmp/image.JPG")))
