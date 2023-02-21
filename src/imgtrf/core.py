@@ -5,6 +5,8 @@ import shutil
 import datetime
 import logging
 
+from imgtrf import meta
+
 from rich import progress
 
 log = logging.getLogger()
@@ -41,8 +43,7 @@ def create_path_based_on_creation_date(
     src_file_path: Path, dest_dir: Path, date_depth: DateDepth
 ) -> Path:
     """Returns path based on creation date of file"""
-    timestamp = src_file_path.stat().st_mtime
-    date = datetime.date.fromtimestamp(timestamp)
+    date = meta.get_win_creation_time(src_file_path)
 
     match date_depth:
         case DateDepth.YEAR:

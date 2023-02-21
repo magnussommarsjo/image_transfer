@@ -3,9 +3,10 @@ from pathlib import Path
 import ffmpeg
 from PIL import Image
 from PIL.ExifTags import TAGS
+from datetime import datetime
 
 
-def get_image_meta(path: str) -> dict[str, str]:
+def get_image_meta(path: Path) -> dict[str, str]:
     """Get image metadata from file"""
     image = Image.open(path)
     exif = {}
@@ -17,7 +18,7 @@ def get_image_meta(path: str) -> dict[str, str]:
 
     return exif
 
-def get_movie_meta(path: str) -> dict[str, str]:
+def get_movie_meta(path: Path) -> dict[str, str]:
     """Get movie metadata from file"""
     try:
         meta = ffmpeg.probe(path)
@@ -27,7 +28,14 @@ def get_movie_meta(path: str) -> dict[str, str]:
         ) from e
     return meta
 
-
+def get_win_creation_time(path: Path):
+    """Get creation time from windows file
+    
+    This does not wotk in lunux environment since linuc does not store creation time. 
+    """
+    timestamp = path.stat().st_mtime
+    date = datetime.date.fromtimestamp(timestamp)
+    return datetime
 
 if __name__ == "__main__":
     # pprint(TAGS)
