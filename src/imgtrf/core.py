@@ -2,14 +2,11 @@ from enum import Enum, auto
 from pathlib import Path
 from typing import Iterator
 import shutil
-import datetime
-import logging
-
-from imgtrf import meta
 
 from rich import progress
 
-log = logging.getLogger()
+from imgtrf.logger import root_logger as log
+from imgtrf import meta
 
 
 def walk(root: str) -> Iterator[Path]:
@@ -43,7 +40,7 @@ def create_path_based_on_creation_date(
     src_file_path: Path, dest_dir: Path, date_depth: DateDepth
 ) -> Path:
     """Returns path based on creation date of file"""
-    date = meta.get_win_creation_time(src_file_path)
+    date = meta.get_creation_time(src_file_path)
 
     match date_depth:
         case DateDepth.YEAR:
@@ -63,22 +60,6 @@ def create_path_based_on_creation_date(
     return target_path
 
 
-def _create_src_dest_pairs(
-    src_dir: Path, dest_dir: Path, date_depth: DateDepth, skip_existing: bool = True
-) -> list[tuple[str, str]]:
-    src_dest_paths: list[tuple[str, str]] = []
-    for src_file_path in walk(src_dir):
-        target_path = create_path_based_on_creation_date(
-            src_file_path, dest_dir, date_depth=date_depth
-        )
-        if skip_existing and target_path.exists():
-            log.info(f"Skipping {src_file_path}")
-            continue
-        else:
-            src_dest_paths.append((src_file_path, target_path))
-    return src_dest_paths
-
-
 def copy_files(
     src_dir: Path,
     dest_dir: Path,
@@ -91,7 +72,6 @@ def copy_files(
     )
 
     if not src_dest_paths:
-        print("No files to copy")
         log.info("No files to copy")
         return
 
@@ -114,7 +94,6 @@ def move_files(
     )
 
     if not src_dest_paths:
-        print("No files to move")
         log.info("No files to move")
         return
 
@@ -123,3 +102,19 @@ def move_files(
     ):
         log.info(f"Moving {src_file_path} to {target_path}")
         _move_file(src_file_path, target_path)
+
+
+def _create_src_dest_pairs(
+    src_dir: Path, dest_dir: Path, date_depth: DateDepth, skip_existing: bool = True
+) -> list[tuple[str, str]]:
+    src_dest_paths: list[tuple[str, str]] = []
+    for src_file_path in walk(src_dir):
+        target_path = create_path_based_on_creation_date(
+            src_file_path, dest_dir, date_depth=date_depth
+        )
+        if skip_existing and target_path.exists():
+            log.info(f"Skipping {src_file_path}")
+            continue
+        else:
+            src_dest_paths.append((src_file_path, target_path))
+    return src_dest_paths
