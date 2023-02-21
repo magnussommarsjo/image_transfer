@@ -15,8 +15,13 @@ dependencies = [
 readme = "README.md"
 
 [project.optional-dependencies]
-dev = [
+test = [
+    "piexif",
     "pytest>=6.0",
+]
+
+dev = [
+    "imgtrf[test]",
     "black",
 ]
 

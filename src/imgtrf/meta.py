@@ -63,7 +63,7 @@ def get_image_creation_time(path: Path) -> datetime | None:
     time_format = r"%Y:%m:%d %H:%M:%S"
     time_string = metadata.get("DateTime")
     creation_time = datetime.strptime(time_string, time_format)
-    
+
     return creation_time
 
 
@@ -72,7 +72,6 @@ def get_video_creation_time(path: Path) -> datetime | None:
     metadata = get_video_meta(path)
 
     # Look at 'creation_time' in 'format'
-    creation_time: datetime = None
     time_string = metadata.get("format", {}).get("tags", {}).get("creation_time", None)
     if time_string is not None:
         return datetime.fromisoformat(time_string)
