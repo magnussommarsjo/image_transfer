@@ -31,16 +31,15 @@ def get_creation_time(path: Path) -> datetime | None:
     Returns:
         datetime | None: file creation time
     """
-    ext = path.suffix.lower()[1:]
     creation_time: datetime = None
 
-    if ext in IMAGE_EXT:
+    if _is_image(path):
         creation_time = get_image_creation_time(path)
 
-    if ext in VIDEO_EXT:
+    if _is_video(path):
         creation_time = get_video_creation_time(path)
 
-    if isWindows() and creation_time is None:
+    if _is_windows() and creation_time is None:
         creation_time = get_win_creation_time(path)
 
     # TODO: Return None or raise error?
@@ -79,7 +78,7 @@ def get_video_creation_time(path: Path) -> datetime | None:
 
 
 @log_func()
-def get_win_creation_time(path: Path):
+def get_win_creation_time(path: Path) -> datetime:
     """Get creation time from windows file
 
     This does not wotk in linux environment since linuc does not store creation time.
@@ -112,8 +111,16 @@ def get_video_meta(path: Path) -> dict:
     return meta
 
 
-def isWindows():
+def _is_windows() -> bool:
     return platform.system() == "Windows"
+
+def _is_image(path: Path) -> bool:
+    ext = path.suffix.lower()[1:]
+    return ext in IMAGE_EXT
+
+def _is_video(path: Path) -> bool:
+    ext = path.suffix.lower()[1:]
+    return ext in VIDEO_EXT
 
 
 if __name__ == "__main__":
