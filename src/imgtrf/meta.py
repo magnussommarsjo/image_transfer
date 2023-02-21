@@ -1,13 +1,81 @@
-from pprint import pprint
 from pathlib import Path
+from datetime import datetime
+import platform
+
 import ffmpeg
 from PIL import Image
 from PIL.ExifTags import TAGS
-from datetime import datetime
+
+import logging
+from imgtrf.logger import log_func, root_logger as log
 
 
-def get_image_meta(path: Path) -> dict[str, str]:
-    """Get image metadata from file"""
+# Supported formats
+IMAGE_EXT = ("jpg", "jpeg" "png")
+VIDEO_EXT = "mp4"
+
+
+def get_creation_time(path: Path) -> datetime | None:
+    """Returns file creation date
+
+    --- STRATEGY ---
+    1) Figure out format of file.
+    2) Try to extract creation time metadata from that file
+    3) If no metadata can be gathered try to fallback on win creation time.
+    3) No metadata for file: Skip file and write error log
+
+
+    Args:
+        path (Path): Path to file
+
+    Returns:
+        datetime | None: file creation time
+    """
+    ext = path.suffix.lower()[1:]
+    creation_time: datetime = None
+
+    if ext in IMAGE_EXT:
+        creation_time = get_image_creation_time(path)
+
+    if ext in VIDEO_EXT:
+        creation_time = get_video_creation_time(path)
+
+    if isWindows() and creation_time is None:
+        creation_time = get_win_creation_time(path)
+
+    # TODO: Return None or raise error?
+    # if not creation_time:
+    #   raise Error()?!
+    return creation_time
+
+
+@log_func()
+def get_image_creation_time(path: Path) -> datetime | None:
+    """Returns creation time if exists in image metadata"""
+    metadata = get_image_meta(path)
+    time_format = r"%Y:%m:%d %H:%M:%S"
+    time_string = metadata.get("DateTime")
+    creation_time = datetime.strptime(time_string, time_format)
+    return creation_time
+
+
+@log_func()
+def get_video_creation_time(path: Path) -> datetime | None:
+    pass
+
+
+@log_func()
+def get_win_creation_time(path: Path):
+    """Get creation time from windows file
+
+    This does not wotk in linux environment since linuc does not store creation time.
+    """
+    timestamp = path.stat().st_mtime
+    return datetime.fromtimestamp(timestamp)
+
+
+def get_image_meta(path: Path) -> dict:
+    """Get image metadata from file using pillow"""
     image = Image.open(path)
     exif = {}
     for tag, value in image.getexif().items():
@@ -18,29 +86,32 @@ def get_image_meta(path: Path) -> dict[str, str]:
 
     return exif
 
-def get_movie_meta(path: Path) -> dict[str, str]:
-    """Get movie metadata from file"""
+
+def get_video_meta(path: Path) -> dict:
+    """Get video metadata from file using ffmpeg"""
     try:
         meta = ffmpeg.probe(path)
     except FileNotFoundError as e:
-        raise ImportError( # ToDo: Not really an import error...
+        raise ImportError(  # ToDo: Not really an import error...
             "Could not use ffmpeg propperly. Make sure its installed correctly and added to path"
         ) from e
     return meta
 
-def get_win_creation_time(path: Path):
-    """Get creation time from windows file
-    
-    This does not wotk in lunux environment since linuc does not store creation time. 
-    """
-    timestamp = path.stat().st_mtime
-    date = datetime.date.fromtimestamp(timestamp)
-    return datetime
+
+def isWindows():
+    return platform.system() == "Windows"
+
 
 if __name__ == "__main__":
-    # pprint(TAGS)
-    # pprint(get_image_meta('./tmp/image.JPG'))
+    # Bsic logging
+    log.setLevel(logging.DEBUG)
+    stream_handler = logging.StreamHandler()
+    log.addHandler(stream_handler)
 
-    pprint()
-    path = Path("./tmp/movie.MP4").resolve()
-    print(path.exists())
+    from rich.pretty import pprint
+
+    # pprint(TAGS)
+    # pprint(get_image_meta("./tmp/image.JPG"))
+
+    pprint(get_creation_time(Path("./tmp/video.MP4")))
+    pprint(get_creation_time(Path("./tmp/image.JPG")))
