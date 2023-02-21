@@ -5,6 +5,7 @@ import platform
 import ffmpeg
 from PIL import Image
 from PIL.ExifTags import TAGS
+import PIL
 
 import logging
 from imgtrf.logger import log_func
@@ -53,10 +54,16 @@ def get_creation_time(path: Path) -> datetime | None:
 @log_func(log)
 def get_image_creation_time(path: Path) -> datetime | None:
     """Returns creation time if exists in image metadata"""
-    metadata = get_image_meta(path)
+    try:
+        metadata = get_image_meta(path)
+    except PIL.UnidentifiedImageError as e:
+        log.error(e)
+        return None
+    
     time_format = r"%Y:%m:%d %H:%M:%S"
     time_string = metadata.get("DateTime")
     creation_time = datetime.strptime(time_string, time_format)
+    
     return creation_time
 
 
