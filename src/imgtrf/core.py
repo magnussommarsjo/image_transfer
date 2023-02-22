@@ -10,6 +10,7 @@ from imgtrf import meta
 
 log = logging.getLogger(__name__)
 
+
 def walk(root: str) -> Iterator[Path]:
     """Recureivly iterates through directories and yields file paths"""
     for path in Path(root).iterdir():
@@ -17,18 +18,6 @@ def walk(root: str) -> Iterator[Path]:
             yield from walk(path)
             continue
         yield path
-
-
-def _copy_file(src_file_path: Path, dest_path: Path) -> None:
-    """Copies file from source to target path"""
-    dest_path.parent.mkdir(parents=True, exist_ok=True)
-    shutil.copy2(src_file_path, dest_path)
-
-
-def _move_file(src_file_path: Path, dest_path: Path) -> None:
-    """Moves file from source to target path"""
-    dest_path.parent.mkdir(parents=True, exist_ok=True)
-    shutil.move(src_file_path, dest_path)
 
 
 class DateDepth(Enum):
@@ -119,3 +108,15 @@ def _create_src_dest_pairs(
         else:
             src_dest_paths.append((src_file_path, target_path))
     return src_dest_paths
+
+
+def _copy_file(src_file_path: Path, dest_path: Path) -> None:
+    """Copies file from source to target path"""
+    dest_path.parent.mkdir(parents=True, exist_ok=True)
+    shutil.copy2(src_file_path, dest_path)
+
+
+def _move_file(src_file_path: Path, dest_path: Path) -> None:
+    """Moves file from source to target path"""
+    dest_path.parent.mkdir(parents=True, exist_ok=True)
+    shutil.move(src_file_path, dest_path)

@@ -5,9 +5,11 @@ import platform
 import ffmpeg
 from PIL import Image
 from PIL.ExifTags import TAGS
+import PIL
 
 import logging
 from imgtrf.logger import log_func
+from imgtrf import exceptions
 
 log = logging.getLogger(__name__)
 
@@ -53,19 +55,28 @@ def get_creation_time(path: Path) -> datetime | None:
 @log_func(log)
 def get_image_creation_time(path: Path) -> datetime | None:
     """Returns creation time if exists in image metadata"""
-    metadata = get_image_meta(path)
+    try:
+        metadata = get_image_meta(path)
+    except PIL.UnidentifiedImageError as e:
+        log.error(e)
+        return None
+
     time_format = r"%Y:%m:%d %H:%M:%S"
     time_string = metadata.get("DateTime")
     creation_time = datetime.strptime(time_string, time_format)
+
     return creation_time
 
 
 @log_func(log)
 def get_video_creation_time(path: Path) -> datetime | None:
-    metadata = get_video_meta(path)
+    try:
+        metadata = get_video_meta(path)
+    except exceptions.MetaDataError as e:
+        log.error(e)
+        return None
 
     # Look at 'creation_time' in 'format'
-    creation_time: datetime = None
     time_string = metadata.get("format", {}).get("tags", {}).get("creation_time", None)
     if time_string is not None:
         return datetime.fromisoformat(time_string)
@@ -107,18 +118,25 @@ def get_video_meta(path: Path) -> dict:
     try:
         meta = ffmpeg.probe(path)
     except FileNotFoundError as e:
-        raise ImportError(  # ToDo: Not really an import error...
+        raise exceptions.MetaDataError(  # ToDo: Not really an import error...
             "Could not use ffmpeg propperly. Make sure its installed correctly and added to path"
         ) from e
+    except ffmpeg.Error as e:
+        raise exceptions.MetaDataError(
+            f"Could not retrive meta data from file: {path}"
+        ) from e
+
     return meta
 
 
 def _is_windows() -> bool:
     return platform.system() == "Windows"
 
+
 def _is_image(path: Path) -> bool:
     ext = path.suffix.lower()[1:]
     return ext in IMAGE_EXT
+
 
 def _is_video(path: Path) -> bool:
     ext = path.suffix.lower()[1:]
