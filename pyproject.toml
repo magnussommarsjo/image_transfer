@@ -5,6 +5,19 @@ build-backend = "setuptools.build_meta"
 [project]
 name = "imgtrf"
 version = "0.0.1"
+authors = [
+    { name="Magnus Sommarsjö"}
+]
+description = "Transfer images from one directoy to another with new folder structure by date"
+readme = "README.md"
+classifiers = [
+    "Programming Language :: Python :: 3",
+    "License :: OSI Approved :: MIT License",
+    "Operating System :: OS Independent",
+    "Environment :: Console",
+    "Topic :: Multimedia :: Graphics :: Capture :: Digital Camera",
+    "Development Status :: 3 - Alpha",
+]
 requires-python = ">=3.10"
 dependencies = [
     "Pillow",
@@ -12,7 +25,10 @@ dependencies = [
     "typer[all]",
     "rich"
 ]
-readme = "README.md"
+
+[project.urls]
+"Homepage" = "https://github.com/magnussommarsjo/image_transfer"
+"Bug Tracker" = "https://github.com/magnussommarsjo/image_transfer/issues"
 
 [project.optional-dependencies]
 test = [
