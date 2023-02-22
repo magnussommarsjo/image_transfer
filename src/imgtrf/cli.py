@@ -6,8 +6,6 @@ from rich import print
 from imgtrf import logger
 from imgtrf.core import copy_files, move_files, DateDepth
 
-logger.configure_logger()
-
 app = typer.Typer(name="Image Transfer")
 
 
