@@ -3,12 +3,12 @@ requires = ["setuptools"]
 build-backend = "setuptools.build_meta"
 
 [project]
-name = "imgtrf"
+name = "image-transfer"
 version = "0.0.1"
 authors = [
     { name="Magnus Sommarsjö"}
 ]
-description = "Transfer images from one directoy to another with new folder structure by date"
+description = "Transfer images and videos from one directoy to another with new folder structure by date"
 readme = "README.md"
 classifiers = [
     "Programming Language :: Python :: 3",

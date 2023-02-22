@@ -11,19 +11,37 @@ where it will create a new folder structure following below format.
 > **MM**: Month as in '01' for January  
 > **DD**: Day as in '02' for second day in the month  
 
+# Usage
+
+Copy from one directory to another
+```
+imgtrf copy {source/directory} {destination/directory}
+```
+
+Move from one directory to another
+```
+imgtrf move {source/directory} {destination/directory}
+```
+
+Change 'depth' of destination folder structure
+```
+imgtrf copy --date-level=month {source/directory} {destination/directory}
+```
 
 
 # Installation
 
-Installation is done by cloning the repository to to your computer and do a local install with pip
+Installation is done via PyPI
 ```sh
-git clone https://github.com/magnussommarsjo/transfer_by_date.git
-cd {your/cloned/repository}
-pip install .
+pip install image-transfer
 ```
 
 To support gathering metadata from videos you need to have **FFmpeg** installed and added to your PATH environment variable. FFmpeg can either be installed from their site [ffmpeg.org](https://ffmpeg.org/download.html) or via winget
-```sh
+```
 winget install --id Gyan.FFmpeg
+```
+or if on linux
+```sh
+sudo apt install ffmpeg
 ```
 Make sure to check your environment variables. Some times even a restart of your computer is necessary for them to be read in properly. 
