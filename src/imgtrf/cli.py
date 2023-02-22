@@ -31,8 +31,6 @@ def copy(
     src_dir: str,
     dest_dir: str,
     date_level: str = "day",
-    verbose: bool = False,
-    debug: bool = False,
 ):
     """Copy files from source dir to destination dir"""
 
@@ -40,8 +38,6 @@ def copy(
 
     source_path = Path(src_dir).resolve()
     destination_path = Path(dest_dir).resolve()
-
-    _set_log_level(verbose, debug)
 
     if not source_path.exists() or not source_path.is_dir():
         print("Source directory does not exists")
@@ -55,8 +51,6 @@ def move(
     src_dir: str,
     dest_dir: str,
     date_level: str = "day",
-    verbose: bool = False,
-    debug: bool = False,
 ):
     """Move files from source dir to destination dir"""
 
@@ -65,8 +59,6 @@ def move(
     source_path = Path(src_dir).resolve()
     destination_path = Path(dest_dir).resolve()
 
-    _set_log_level(verbose, debug)
-
     if not source_path.exists() or not source_path.is_dir():
         print("Source directory does not exists")
         raise NotADirectoryError(src_dir)
@@ -74,8 +66,8 @@ def move(
     move_files(src_dir=source_path, dest_dir=destination_path, date_depth=date_depth)
 
 
-
-def _set_log_level(verbose: bool = False, debug: bool = False):
+@app.callback()
+def main(verbose: bool = False, debug: bool = False):
     if verbose:
         root_logger.setLevel(logging.INFO)
 
