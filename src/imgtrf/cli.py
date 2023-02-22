@@ -1,29 +1,25 @@
 from pathlib import Path
-import logging
 
 import typer
 from rich import print
 
-from imgtrf.logger import root_logger
+from imgtrf import logger
 from imgtrf.core import copy_files, move_files, DateDepth
 
-# Set up logging
-log = logging.getLogger(__name__)
-root_logger.addHandler(logging.StreamHandler())
+logger.configure_logger()
 
-app = typer.Typer()
+app = typer.Typer(name="Image Transfer")
 
 
-def parse_date_depth(date_depth: str) -> DateDepth:
-    match date_depth.lower():
-        case "day":
-            return DateDepth.DAY
-        case "month":
-            return DateDepth.MONTH
-        case "year":
-            return DateDepth.YEAR
-        case _:
-            raise ValueError(f"Argument {date_depth=} not recognised")
+@app.callback()
+def main(verbose: bool = False, debug: bool = False):
+    """Image Transfer
+
+    Used to transfer images and video files from a directory
+    into a new directory with date folder structure.
+    """
+    # Set verbosity
+    logger.set_verbosity(verbose, debug)
 
 
 @app.command()
@@ -34,7 +30,7 @@ def copy(
 ):
     """Copy files from source dir to destination dir"""
 
-    date_depth = parse_date_depth(date_level)
+    date_depth = _parse_date_depth(date_level)
 
     source_path = Path(src_dir).resolve()
     destination_path = Path(dest_dir).resolve()
@@ -54,7 +50,7 @@ def move(
 ):
     """Move files from source dir to destination dir"""
 
-    date_depth = parse_date_depth(date_level)
+    date_depth = _parse_date_depth(date_level)
 
     source_path = Path(src_dir).resolve()
     destination_path = Path(dest_dir).resolve()
@@ -66,10 +62,24 @@ def move(
     move_files(src_dir=source_path, dest_dir=destination_path, date_depth=date_depth)
 
 
-@app.callback()
-def main(verbose: bool = False, debug: bool = False):
-    if verbose:
-        root_logger.setLevel(logging.INFO)
+def _parse_date_depth(date_depth: str) -> DateDepth:
+    """Parses string to DateDepth
 
-    if debug:
-        root_logger.setLevel(logging.DEBUG)
+    Args:
+        date_depth (str): Depth as 'day' | 'month' | 'year'
+
+    Raises:
+        ValueError: If not argument matches
+
+    Returns:
+        DateDepth: Date depth as enum
+    """
+    match date_depth.lower():
+        case "day":
+            return DateDepth.DAY
+        case "month":
+            return DateDepth.MONTH
+        case "year":
+            return DateDepth.YEAR
+        case _:
+            raise ValueError(f"Argument {date_depth=} not recognised")
