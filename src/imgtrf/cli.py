@@ -72,12 +72,11 @@ def _parse_date_depth(date_depth: str) -> DateDepth:
     Returns:
         DateDepth: Date depth as enum
     """
-    match date_depth.lower():
-        case "day":
-            return DateDepth.DAY
-        case "month":
-            return DateDepth.MONTH
-        case "year":
-            return DateDepth.YEAR
-        case _:
-            raise ValueError(f"Argument {date_depth=} not recognised")
+    if date_depth.lower() == "day":
+        return DateDepth.DAY
+    if date_depth.lower() == "month":
+        return DateDepth.MONTH
+    if date_depth.lower() == "year":
+        return DateDepth.YEAR
+
+    raise ValueError(f"Argument {date_depth=} not recognised")

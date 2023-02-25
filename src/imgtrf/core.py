@@ -1,6 +1,6 @@
 from enum import Enum, auto
 from pathlib import Path
-from typing import Iterator
+from typing import Iterator, List, Tuple
 import shutil
 
 from rich import progress
@@ -32,22 +32,21 @@ def create_path_based_on_creation_date(
     """Returns path based on creation date of file"""
     date = meta.get_creation_time(src_file_path)
 
-    match date_depth:
-        case DateDepth.YEAR:
-            target_path = dest_dir.joinpath(str(date.year), src_file_path.name)
-        case DateDepth.MONTH:
-            target_path = dest_dir.joinpath(
-                str(date.year), f"{date.month:02d}", src_file_path.name
-            )
-        case DateDepth.DAY:
-            target_path = dest_dir.joinpath(
-                str(date.year),
-                f"{date.month:02d}",
-                f"{date.day:02d}",
-                src_file_path.name,
-            )
+    if date_depth == DateDepth.YEAR:
+        return dest_dir.joinpath(str(date.year), src_file_path.name)
 
-    return target_path
+    if date_depth == DateDepth.MONTH:
+        return dest_dir.joinpath(
+            str(date.year), f"{date.month:02d}", src_file_path.name
+        )
+
+    if date_depth == DateDepth.DAY:
+        return dest_dir.joinpath(
+            str(date.year),
+            f"{date.month:02d}",
+            f"{date.day:02d}",
+            src_file_path.name,
+        )
 
 
 def copy_files(
@@ -96,8 +95,8 @@ def move_files(
 
 def _create_src_dest_pairs(
     src_dir: Path, dest_dir: Path, date_depth: DateDepth, skip_existing: bool = True
-) -> list[tuple[str, str]]:
-    src_dest_paths: list[tuple[str, str]] = []
+) -> List[Tuple[str, str]]:
+    src_dest_paths: List[Tuple[str, str]] = []
     for src_file_path in walk(src_dir):
         target_path = create_path_based_on_creation_date(
             src_file_path, dest_dir, date_depth=date_depth
