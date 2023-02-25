@@ -11,6 +11,8 @@ import logging
 from imgtrf.logger import log_func
 from imgtrf import exceptions
 
+from typing import Optional
+
 log = logging.getLogger(__name__)
 
 
@@ -19,7 +21,7 @@ IMAGE_EXT = {"jpg", "jpeg" "png"}
 VIDEO_EXT = {"mp4"}
 
 
-def get_creation_time(path: Path) -> datetime | None:
+def get_creation_time(path: Path) -> Optional[datetime]:
     """Returns file creation date
 
     --- STRATEGY ---
@@ -53,7 +55,7 @@ def get_creation_time(path: Path) -> datetime | None:
 
 
 @log_func(log)
-def get_image_creation_time(path: Path) -> datetime | None:
+def get_image_creation_time(path: Path) -> Optional[datetime]:
     """Returns creation time if exists in image metadata"""
     try:
         metadata = get_image_meta(path)
@@ -69,7 +71,7 @@ def get_image_creation_time(path: Path) -> datetime | None:
 
 
 @log_func(log)
-def get_video_creation_time(path: Path) -> datetime | None:
+def get_video_creation_time(path: Path) -> Optional[datetime]:
     try:
         metadata = get_video_meta(path)
     except exceptions.MetaDataError as e:
@@ -79,7 +81,7 @@ def get_video_creation_time(path: Path) -> datetime | None:
     # Look at 'creation_time' in 'format'
     time_string = metadata.get("format", {}).get("tags", {}).get("creation_time", None)
     if time_string is not None:
-        return datetime.fromisoformat(time_string)
+        return _string_to_datetime(time_string)
 
     # Look at 'creation_time' in streams/tags
     streams: list[dict] = metadata.get("streams", [])
@@ -87,7 +89,13 @@ def get_video_creation_time(path: Path) -> datetime | None:
         # TODO: streams consists of both video and audio. Loop through?
         time_string = streams[0].get("tags", {}).get("creation_time")
         if time_string is not None:
-            return datetime.fromisoformat(time_string)
+            return _string_to_datetime(time_string)
+
+def _string_to_datetime(time_string: str) -> datetime:
+    # Since vefore python 3.11 datetime.fromitoformat cant handle timezones.
+    if len(time_string) > 19:
+        time_string = time_string[:19]
+    return datetime.fromisoformat(time_string)
 
 
 @log_func(log)
@@ -106,9 +114,9 @@ def get_image_meta(path: Path) -> dict:
     exif = {}
     for tag, value in image.getexif().items():
         if tag in TAGS.keys():
-            exif |= {TAGS[tag]: value}
+            exif.update({TAGS[tag]: value})
         else:
-            exif |= {tag: value}
+            exif.update({tag: value})
 
     return exif
 

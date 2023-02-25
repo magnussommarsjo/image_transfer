@@ -18,7 +18,7 @@ classifiers = [
     "Topic :: Multimedia :: Graphics :: Capture :: Digital Camera",
     "Development Status :: 3 - Alpha",
 ]
-requires-python = ">=3.10"
+requires-python = ">=3.8"
 dependencies = [
     "Pillow",
     "ffmpeg-python",
@@ -37,7 +37,7 @@ test = [
 ]
 
 dev = [
-    "imgtrf[test]",
+    "image-transfer[test]",
     "black",
 ]
 
