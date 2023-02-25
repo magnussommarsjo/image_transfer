@@ -23,9 +23,9 @@ def create_image(directory: Path, file_name: str, creation_date: datetime):
 
     with Image.new("RGB", (10, 20)) as image:
         exif = {}
-        exif |= {"0th": {piexif.ImageIFD.DateTime: time_string}}
-        exif |= {"Exif": {piexif.ExifIFD.DateTimeOriginal: time_string}}
-        exif |= {"Exif": {piexif.ExifIFD.DateTimeDigitized: time_string}}
+        exif.update({"0th": {piexif.ImageIFD.DateTime: time_string}})
+        exif.update({"Exif": {piexif.ExifIFD.DateTimeOriginal: time_string}})
+        exif.update({"Exif": {piexif.ExifIFD.DateTimeDigitized: time_string}})
         image.save(file_path, exif=piexif.dump(exif))
 
 
