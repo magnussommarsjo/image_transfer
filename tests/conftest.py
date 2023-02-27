@@ -7,7 +7,7 @@ import pytest
 from pathlib import Path
 
 
-def create_image(directory: Path, file_name: str, creation_date: datetime):
+def create_image(directory: Path, file_name: str, creation_date: datetime) -> Path:
     """Create dummy image with metadata
 
     Reference
@@ -27,6 +27,16 @@ def create_image(directory: Path, file_name: str, creation_date: datetime):
         exif.update({"Exif": {piexif.ExifIFD.DateTimeOriginal: time_string}})
         exif.update({"Exif": {piexif.ExifIFD.DateTimeDigitized: time_string}})
         image.save(file_path, exif=piexif.dump(exif))
+
+    return file_path
+
+
+@pytest.fixture
+def temp_image(tmp_path: Path) -> Path:
+    image_path = create_image(
+        tmp_path, "image.jpg", creation_date=datetime(2020, 1, 1, 12, 00)
+    )
+    yield image_path
 
 
 @pytest.fixture

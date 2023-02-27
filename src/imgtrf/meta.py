@@ -65,9 +65,13 @@ def get_image_creation_time(path: Path) -> Optional[datetime]:
 
     time_format = r"%Y:%m:%d %H:%M:%S"
     time_string = metadata.get("DateTime")
-    creation_time = datetime.strptime(time_string, time_format)
-
-    return creation_time
+    if time_string:
+        creation_time = datetime.strptime(time_string, time_format)
+        return creation_time
+    
+    else:
+        log.debug(f"Could not find 'DateTime' in {path}")
+        return None
 
 
 @log_func(log)
