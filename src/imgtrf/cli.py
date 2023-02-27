@@ -6,7 +6,7 @@ from rich import print
 from imgtrf import logger
 from imgtrf.core import copy_files, move_files, DateDepth
 
-app = typer.Typer(name="Image Transfer")
+app = typer.Typer(name="Image Transfer", add_completion=False)
 
 
 @app.callback()

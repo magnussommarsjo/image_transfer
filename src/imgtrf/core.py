@@ -3,9 +3,10 @@ from pathlib import Path
 from typing import Iterator, List, Tuple
 import shutil
 
-from rich import progress
+from rich.progress import Progress
 
 import logging
+from imgtrf.logger import console
 from imgtrf import meta
 
 log = logging.getLogger(__name__)
@@ -26,7 +27,7 @@ class DateDepth(Enum):
     DAY = auto()
 
 
-def create_path_based_on_creation_date(
+def _create_path_by_creation_date(
     src_file_path: Path, dest_dir: Path, date_depth: DateDepth
 ) -> Path:
     """Returns path based on creation date of file"""
@@ -64,11 +65,12 @@ def copy_files(
         log.info("No files to copy")
         return
 
-    for src_file_path, target_path in progress.track(
-        src_dest_paths, description="Copying files"
-    ):
-        log.info(f"Copying {src_file_path} to {target_path}")
-        _copy_file(src_file_path, target_path)
+    with Progress(console=console) as progress:
+        for src_file_path, target_path in progress.track(
+            src_dest_paths, description="Copying"
+        ):
+            log.info(f"Copying {src_file_path} to {target_path}")
+            _copy_file(src_file_path, target_path)
 
 
 def move_files(
@@ -86,27 +88,33 @@ def move_files(
         log.info("No files to move")
         return
 
-    for src_file_path, target_path in progress.track(
-        src_dest_paths, description="Moving files"
-    ):
-        log.info(f"Moving {src_file_path} to {target_path}")
-        _move_file(src_file_path, target_path)
+    with Progress(console=console) as progress:
+        for src_file_path, target_path in progress.track(
+            src_dest_paths, description="Moving"
+        ):
+            log.info(f"Moving {src_file_path} to {target_path}")
+            _move_file(src_file_path, target_path)
 
 
 def _create_src_dest_pairs(
     src_dir: Path, dest_dir: Path, date_depth: DateDepth, skip_existing: bool = True
 ) -> List[Tuple[str, str]]:
     src_dest_paths: List[Tuple[str, str]] = []
-    for src_file_path in walk(src_dir):
-        target_path = create_path_based_on_creation_date(
-            src_file_path, dest_dir, date_depth=date_depth
-        )
-        if skip_existing and target_path.exists():
-            log.info(f"Skipping {src_file_path}")
-            continue
-        else:
-            src_dest_paths.append((src_file_path, target_path))
-    return src_dest_paths
+
+    with Progress(console=console) as progress:
+        for src_file_path in progress.track(
+            walk(src_dir),
+            description="Indexing",
+        ):
+            target_path = _create_path_by_creation_date(
+                src_file_path, dest_dir, date_depth=date_depth
+            )
+            if skip_existing and target_path.exists():
+                log.info(f"Skipping {src_file_path}")
+                continue
+            else:
+                src_dest_paths.append((src_file_path, target_path))
+        return src_dest_paths
 
 
 def _copy_file(src_file_path: Path, dest_path: Path) -> None:
