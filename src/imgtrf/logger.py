@@ -2,13 +2,17 @@ import functools
 import logging
 import sys
 import imgtrf
+import rich
+from rich.logging import RichHandler
 
 root_logger = logging.getLogger(imgtrf.__name__)
+console = rich.console.Console()
+rich_handler = RichHandler(console=console)
 
 
 def configure_logger(log=root_logger):
     """Configure logger for cli purpose"""
-    log.addHandler(logging.StreamHandler())
+    log.addHandler(rich_handler)
 
     # Default verbosity
     log.setLevel(logging.CRITICAL)
