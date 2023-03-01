@@ -1,3 +1,4 @@
+from datetime import datetime
 from enum import Enum, auto
 from pathlib import Path
 from typing import Iterator, List, Tuple
@@ -48,6 +49,43 @@ def _create_path_by_creation_date(
             f"{date.day:02d}",
             src_file_path.name,
         )
+
+
+def _create_path_from(date_time: datetime, dir_format: str) -> Path:
+    """Creates formated path from date_time
+
+    Reference:
+        https://docs.python.org/3.8/library/datetime.html#strftime-and-strptime-format-codes
+
+    Args:
+        date_time (datetime): time to be used in path formatting
+        dir_format (str): String including format codes of how to format the path
+
+    Returns:
+        Path: A path formatted by datetime
+    """
+
+    # Assume that we strictly indicate format codes with %
+    if "%" in dir_format:
+        return Path(date_time.strftime(dir_format))
+    
+    # If no % signs in dir_format, assume that it is loosly formated and that evry 
+    # character could be a format code. 
+    path = Path()
+    for directory_string in dir_format.split("/"):
+        folder_name = ""
+        for char in directory_string:
+            try:
+                dir_part = date_time.strftime(f"%{char}")
+            except ValueError:
+                # If we cant translate, we append that character instead.
+                folder_name += char
+            else:
+                folder_name += dir_part
+        path = path.joinpath(folder_name)
+
+    path
+    return path
 
 
 def copy_files(
