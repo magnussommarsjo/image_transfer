@@ -7,10 +7,10 @@ from imgtrf import core
 
 
 def test_copy_files(temp_directory: Path):
-    src_path = temp_directory / "source"
-    dest_path = temp_directory / "destination"
+    src_dir = temp_directory / "source"
+    dest_dir = temp_directory / "destination"
 
-    core.copy_files(src_path, dest_path)
+    core.copy_files(src_dir=src_dir, dest_dir=dest_dir, dir_format="%Y/%m/%d")
 
     assert (
         temp_directory / "destination" / "2020" / "01" / "01" / "file01.jpg"
@@ -21,10 +21,10 @@ def test_copy_files(temp_directory: Path):
 
 
 def test_move_files(temp_directory: Path):
-    src_path = temp_directory / "source"
-    dest_path = temp_directory / "destination"
+    src_dir = temp_directory / "source"
+    dest_dir = temp_directory / "destination"
 
-    core.move_files(src_path, dest_path)
+    core.move_files(src_dir=src_dir, dest_dir=dest_dir, dir_format="%Y/%m/%d")
 
     assert (
         temp_directory / "destination" / "2020" / "01" / "01" / "file01.jpg"
@@ -32,8 +32,6 @@ def test_move_files(temp_directory: Path):
 
     assert not (temp_directory / "source" / "file01.jpg").exists()
     assert not (temp_directory / "source" / "subfolder" / "file02.jpg").exists()
-
-
 
 
 @pytest.mark.parametrize(
