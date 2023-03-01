@@ -9,6 +9,12 @@ from imgtrf.core import copy_files, move_files
 app = typer.Typer(name="Image Transfer", add_completion=False)
 
 
+_option_dir_format = typer.Option(
+    default="Y/m/d",
+    help="""Format of destination directory.Directories seperated with '/' and format codes with '%' followed by single character.""",
+)
+
+
 @app.callback()
 def main(verbose: bool = False, debug: bool = False):
     """Image Transfer
@@ -42,7 +48,7 @@ def copy(
 def move(
     src_dir: str,
     dest_dir: str,
-    dir_format: str = "Y/m/d",
+    dir_format: str = _option_dir_format,
 ):
     """Move files from source dir to destination dir"""
 
