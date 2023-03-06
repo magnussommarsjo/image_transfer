@@ -154,3 +154,14 @@ def _move_file(src_file_path: Path, dest_path: Path) -> None:
     """Moves file from source to target path"""
     dest_path.parent.mkdir(parents=True, exist_ok=True)
     shutil.move(src_file_path, dest_path)
+
+def remove_dirs(root_dir: Path) -> None:
+
+    for path in Path(root_dir).iterdir():
+        if path.is_dir():
+            remove_dirs(path)
+
+    children = [child for child in root_dir.iterdir()]
+    # remove if empty
+    if len(children) == 0:
+        root_dir.rmdir()
