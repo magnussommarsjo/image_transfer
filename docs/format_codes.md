@@ -1,3 +1,5 @@
+# Format Codes
+
 Format codes according to 1989 C standard.
 
 |Directive|Meaning|Example|
@@ -13,7 +15,7 @@ Format codes according to 1989 C standard.
 |%Y|Year with century as a decimal number.|0001, 0002, …, 2013, 2014, …, 9998, 9999|
 |%H|Hour (24-hour clock) as a zero-padded decimal number.|00, 01, …, 23|
 |%I|Hour (12-hour clock) as a zero-padded decimal number.|01, 02, …, 12|
-|%p|Locale’s equivalent of either AM or PM.|AM, PM (en_US);<br>am, pm (de_DE)|	
+|%p|Locale’s equivalent of either AM or PM.|AM, PM (en_US);<br>am, pm (de_DE)| 
 |%M|Minute as a zero-padded decimal number.|00, 01, …, 59|
 |%S|Second as a zero-padded decimal number.|00, 01, …, 59|
 |%f|Microsecond as a decimal number, zero-padded to 6 digits.|000000, 000001, …, 999999|
@@ -29,4 +31,4 @@ Format codes according to 1989 C standard.
 |%G|ISO 8601 year with century representing the year that contains the greater part of the ISO week (%V).|0001, 0002, …, 2013, 2014, …, 9998, 9999|
 |%u|ISO 8601 weekday as a decimal number where 1 is Monday.|1, 2, …, 7|
 |%V|ISO 8601 week as a decimal number with Monday as the first day of the week. Week 01 is the week containing Jan 4.|01, 02, …, 53|
-*Reference: https://docs.python.org/3/library/datetime.html#strftime-and-strptime-format-codes*
+> *Reference: <https://docs.python.org/3/library/datetime.html#strftime-and-strptime-format-codes>*
