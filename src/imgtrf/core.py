@@ -1,5 +1,6 @@
 from datetime import datetime
 from pathlib import Path
+import string
 from typing import Iterator, List, Tuple
 import shutil
 
@@ -122,12 +123,15 @@ def _create_path_from(date_time: datetime, dir_format: str) -> Path:
     if "%" in dir_format:
         return Path(date_time.strftime(dir_format))
 
-    # If no % signs in dir_format, assume that it is loosly formated and that evry
+    # If no % signs in dir_format, assume that it is loosly formated and that every
     # character could be a format code.
     path = Path()
     for directory_string in dir_format.split("/"):
         folder_name = ""
         for char in directory_string:
+            if char not in string.ascii_letters:
+                folder_name += char
+                continue
             try:
                 dir_part = date_time.strftime(f"%{char}")
             except ValueError:
@@ -137,7 +141,6 @@ def _create_path_from(date_time: datetime, dir_format: str) -> Path:
                 folder_name += dir_part
         path = path.joinpath(folder_name)
 
-    path
     return path
 
 
