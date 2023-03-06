@@ -41,7 +41,9 @@ def copy(
         print("Source directory does not exists")
         raise NotADirectoryError(src_dir)
 
-    core.copy_files(src_dir=source_path, dest_dir=destination_path, dir_format=dir_format)
+    core.copy_files(
+        src_dir=source_path, dest_dir=destination_path, dir_format=dir_format
+    )
 
 
 @app.command()
@@ -59,24 +61,28 @@ def move(
         print("Source directory does not exists")
         raise NotADirectoryError(src_dir)
 
-    core.move_files(src_dir=source_path, dest_dir=destination_path, dir_format=dir_format)
+    core.move_files(
+        src_dir=source_path, dest_dir=destination_path, dir_format=dir_format
+    )
 
 
 remove_app = typer.Typer(name="remove")
 app.add_typer(remove_app)
+
 
 @remove_app.callback()
 def remove_main():
     """Removal of directories and files"""
     pass
 
+
 @remove_app.command("dirs")
-def remove_dirs(root_dir: str):
-    """Remove empty directories recursivly, target directory not included"""
-    root_dir_path = Path(root_dir)
+def remove_dirs(directory: str = typer.Argument(..., help="Root directory to remove")):
+    """Remove empty directories recursivly, target directory included"""
+    dir_path = Path(directory)
 
-    if not root_dir_path.exists() or not root_dir_path.is_dir():
+    if not dir_path.exists() or not dir_path.is_dir():
         print("Directory does not exists")
-        raise NotADirectoryError(root_dir_path)
+        raise NotADirectoryError(dir_path)
 
-    core.remove_dirs(root_dir_path)
+    core.remove_dirs(dir_path)
