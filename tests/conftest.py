@@ -41,11 +41,12 @@ def temp_image(tmp_path: Path) -> Path:
 
 @pytest.fixture
 def temp_directory(tmp_path: Path) -> Path:
-    # Create folders
+    # Source for move and copy
     src = tmp_path / "source"
     src_subfolder = src / "subfolder"
-    src.mkdir()
-    src_subfolder.mkdir()
+    src_subfolder.mkdir(parents=True)
+
+    # Destingation for move and copy
     dest = tmp_path / "destination"
     dest.mkdir()
 

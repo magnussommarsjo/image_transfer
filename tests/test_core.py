@@ -50,3 +50,37 @@ def test_create_path_from(dir_format: str, expected_path: Path):
     dt = datetime(2023, 1, 1, 12, 0)
     output = core._create_path_from(dt, dir_format)
     assert output == expected_path
+
+
+def test_remove_dirs(tmp_path: Path):
+    # Create empty
+    empty_path = tmp_path / "to_remove" / "empty" / "subfolder"
+    empty_path.mkdir(parents=True)
+    assert empty_path.exists()
+    
+    # Create non-empty
+    not_empty = tmp_path / "to_remove" / "not_empty" / "subfolder"
+    not_empty.mkdir(parents=True)
+    file = not_empty / "file.txt"
+    file.write_text('NOT TO BE REMOVED')
+    assert file.exists() and file.is_file()
+
+    core.remove_dirs(tmp_path / "to_remove")
+
+    assert not_empty.exists()
+    assert not empty_path.exists()
+    
+    
+def test_remove_dirs_cwd(monkeypatch: pytest.MonkeyPatch, tmp_path: Path):
+    """Test that we skip removing the current working directory"""
+
+    empty_path: Path = tmp_path / "empty"
+    sub_folder = empty_path / "subfolder" / "subfolder2"
+    sub_folder.mkdir(parents=True)
+
+    monkeypatch.chdir(empty_path)
+    assert Path.cwd() == empty_path
+
+    core.remove_dirs(Path('.'))
+    assert empty_path.exists()  # cwd should not be removed
+    assert len([c for c in empty_path.iterdir()]) == 0 # empty

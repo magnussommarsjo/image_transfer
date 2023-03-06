@@ -28,6 +28,12 @@ Defaults to `Y/m/d` for Year/Month/Day. Directories are seperated by `/` and the
 imgtrf copy --dir-format {dir_format} {source/directory} {destination/directory}
 ```
 
+You can also remove empty directories.
+
+```pwsh
+imgtrf remove dirs {target/root/directory}
+```
+
 You can always find specific help with the `--help` flag.
 
 ```pwsh
