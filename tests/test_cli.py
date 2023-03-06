@@ -1,5 +1,7 @@
 from pathlib import Path
 
+import pytest
+
 from typer.testing import CliRunner
 from imgtrf.cli import app
 
@@ -16,6 +18,16 @@ def test_copy(temp_directory: Path):
     ).exists()
 
 
+def test_copy_format(temp_directory: Path):
+    src_path = temp_directory / "source"
+    dest_path = temp_directory / "destination"
+    result = runner.invoke(
+        app, ["copy", "--dir-format", "Y/m", str(src_path), str(dest_path)]
+    )
+    assert result.exit_code == 0
+    assert (temp_directory / "destination" / "2020" / "01" / "file01.jpg").exists()
+
+
 def test_copy_not_a_directory(temp_directory: Path):
     src_path = temp_directory / "not-exists"
     dest_path = temp_directory / "destination"
@@ -23,3 +35,25 @@ def test_copy_not_a_directory(temp_directory: Path):
     result = runner.invoke(app, ["copy", str(src_path), str(dest_path)])
 
     assert result.exit_code == 1
+
+
+def test_move(temp_directory: Path):
+    src_path = temp_directory / "source"
+    dest_path = temp_directory / "destination"
+    result = runner.invoke(app, ["move", str(src_path), str(dest_path)])
+    assert result.exit_code == 0
+    assert (
+        temp_directory / "destination" / "2020" / "01" / "01" / "file01.jpg"
+    ).exists()
+    assert not (temp_directory / "source" / "file01.jpg").exists()
+
+
+def test_move_format(temp_directory: Path):
+    src_path = temp_directory / "source"
+    dest_path = temp_directory / "destination"
+    result = runner.invoke(
+        app, ["move", "--dir-format", "Y/m", str(src_path), str(dest_path)]
+    )
+    assert result.exit_code == 0
+    assert (temp_directory / "destination" / "2020" / "01" / "file01.jpg").exists()
+    assert not (temp_directory / "source" / "file01.jpg").exists()

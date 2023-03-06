@@ -1,5 +1,6 @@
-from enum import Enum, auto
+from datetime import datetime
 from pathlib import Path
+import string
 from typing import Iterator, List, Tuple
 import shutil
 
@@ -12,53 +13,18 @@ from imgtrf import meta
 log = logging.getLogger(__name__)
 
 
-def walk(root: str) -> Iterator[Path]:
-    """Recureivly iterates through directories and yields file paths"""
-    for path in Path(root).iterdir():
-        if path.is_dir():
-            yield from walk(path)
-            continue
-        yield path
-
-
-class DateDepth(Enum):
-    YEAR = auto()
-    MONTH = auto()
-    DAY = auto()
-
-
-def _create_path_by_creation_date(
-    src_file_path: Path, dest_dir: Path, date_depth: DateDepth
-) -> Path:
-    """Returns path based on creation date of file"""
-    date = meta.get_creation_time(src_file_path)
-
-    if date_depth == DateDepth.YEAR:
-        return dest_dir.joinpath(str(date.year), src_file_path.name)
-
-    if date_depth == DateDepth.MONTH:
-        return dest_dir.joinpath(
-            str(date.year), f"{date.month:02d}", src_file_path.name
-        )
-
-    if date_depth == DateDepth.DAY:
-        return dest_dir.joinpath(
-            str(date.year),
-            f"{date.month:02d}",
-            f"{date.day:02d}",
-            src_file_path.name,
-        )
-
-
 def copy_files(
     src_dir: Path,
     dest_dir: Path,
-    date_depth: DateDepth = DateDepth.DAY,
+    dir_format: str,
     skip_existing=True,
 ) -> None:
     """Copies files from source to target directory"""
     src_dest_paths = _create_src_dest_pairs(
-        src_dir, dest_dir, date_depth, skip_existing
+        src_dir=src_dir,
+        dest_dir=dest_dir,
+        dir_format=dir_format,
+        skip_existing=skip_existing,
     )
 
     if not src_dest_paths:
@@ -76,12 +42,15 @@ def copy_files(
 def move_files(
     src_dir: Path,
     dest_dir: Path,
-    date_depth: DateDepth = DateDepth.DAY,
+    dir_format: str,
     skip_existing=True,
 ) -> None:
     """Copies files from source to target directory"""
     src_dest_paths = _create_src_dest_pairs(
-        src_dir, dest_dir, date_depth, skip_existing
+        src_dir=src_dir,
+        dest_dir=dest_dir,
+        dir_format=dir_format,
+        skip_existing=skip_existing,
     )
 
     if not src_dest_paths:
@@ -96,8 +65,17 @@ def move_files(
             _move_file(src_file_path, target_path)
 
 
+def walk(root: str) -> Iterator[Path]:
+    """Recureivly iterates through directories and yields file paths"""
+    for path in Path(root).iterdir():
+        if path.is_dir():
+            yield from walk(path)
+            continue
+        yield path
+
+
 def _create_src_dest_pairs(
-    src_dir: Path, dest_dir: Path, date_depth: DateDepth, skip_existing: bool = True
+    src_dir: Path, dest_dir: Path, dir_format: str, skip_existing: bool = True
 ) -> List[Tuple[str, str]]:
     src_dest_paths: List[Tuple[str, str]] = []
 
@@ -107,7 +85,7 @@ def _create_src_dest_pairs(
             description="Indexing",
         ):
             target_path = _create_path_by_creation_date(
-                src_file_path, dest_dir, date_depth=date_depth
+                src_file_path=src_file_path, dest_dir=dest_dir, dir_format=dir_format
             )
             if skip_existing and target_path.exists():
                 log.info(f"Skipping {src_file_path}")
@@ -115,6 +93,55 @@ def _create_src_dest_pairs(
             else:
                 src_dest_paths.append((src_file_path, target_path))
         return src_dest_paths
+
+
+def _create_path_by_creation_date(
+    src_file_path: Path, dest_dir: Path, dir_format: str
+) -> Path:
+    """Returns path based on creation date of file"""
+    date = meta.get_creation_time(src_file_path)
+    sub_directories = _create_path_from(date, dir_format)
+
+    return dest_dir / sub_directories / src_file_path.name
+
+
+def _create_path_from(date_time: datetime, dir_format: str) -> Path:
+    """Creates formated path from date_time
+
+    Reference:
+        https://docs.python.org/3.8/library/datetime.html#strftime-and-strptime-format-codes
+
+    Args:
+        date_time (datetime): time to be used in path formatting
+        dir_format (str): String including format codes of how to format the path
+
+    Returns:
+        Path: A path formatted by datetime
+    """
+
+    # Assume that we strictly indicate format codes with %
+    if "%" in dir_format:
+        return Path(date_time.strftime(dir_format))
+
+    # If no % signs in dir_format, assume that it is loosly formated and that every
+    # character could be a format code.
+    path = Path()
+    for directory_string in dir_format.split("/"):
+        folder_name = ""
+        for char in directory_string:
+            if char not in string.ascii_letters:
+                folder_name += char
+                continue
+            try:
+                dir_part = date_time.strftime(f"%{char}")
+            except ValueError:
+                # If we cant translate, we append that character instead.
+                folder_name += char
+            else:
+                folder_name += dir_part
+        path = path.joinpath(folder_name)
+
+    return path
 
 
 def _copy_file(src_file_path: Path, dest_path: Path) -> None:

@@ -4,9 +4,15 @@ import typer
 from rich import print
 
 from imgtrf import logger
-from imgtrf.core import copy_files, move_files, DateDepth
+from imgtrf.core import copy_files, move_files
 
 app = typer.Typer(name="Image Transfer", add_completion=False)
+
+
+_option_dir_format = typer.Option(
+    default="Y/m/d",
+    help="""Format of destination directory.Directories seperated with '/' and format codes with '%' followed by single character.""",
+)
 
 
 @app.callback()
@@ -24,11 +30,9 @@ def main(verbose: bool = False, debug: bool = False):
 def copy(
     src_dir: str,
     dest_dir: str,
-    date_level: str = "day",
+    dir_format: str = "Y/m/d",
 ):
     """Copy files from source dir to destination dir"""
-
-    date_depth = _parse_date_depth(date_level)
 
     source_path = Path(src_dir).resolve()
     destination_path = Path(dest_dir).resolve()
@@ -37,18 +41,16 @@ def copy(
         print("Source directory does not exists")
         raise NotADirectoryError(src_dir)
 
-    copy_files(src_dir=source_path, dest_dir=destination_path, date_depth=date_depth)
+    copy_files(src_dir=source_path, dest_dir=destination_path, dir_format=dir_format)
 
 
 @app.command()
 def move(
     src_dir: str,
     dest_dir: str,
-    date_level: str = "day",
+    dir_format: str = _option_dir_format,
 ):
     """Move files from source dir to destination dir"""
-
-    date_depth = _parse_date_depth(date_level)
 
     source_path = Path(src_dir).resolve()
     destination_path = Path(dest_dir).resolve()
@@ -57,26 +59,4 @@ def move(
         print("Source directory does not exists")
         raise NotADirectoryError(src_dir)
 
-    move_files(src_dir=source_path, dest_dir=destination_path, date_depth=date_depth)
-
-
-def _parse_date_depth(date_depth: str) -> DateDepth:
-    """Parses string to DateDepth
-
-    Args:
-        date_depth (str): Depth as 'day' | 'month' | 'year'
-
-    Raises:
-        ValueError: If not argument matches
-
-    Returns:
-        DateDepth: Date depth as enum
-    """
-    if date_depth.lower() == "day":
-        return DateDepth.DAY
-    if date_depth.lower() == "month":
-        return DateDepth.MONTH
-    if date_depth.lower() == "year":
-        return DateDepth.YEAR
-
-    raise ValueError(f"Argument {date_depth=} not recognised")
+    move_files(src_dir=source_path, dest_dir=destination_path, dir_format=dir_format)
