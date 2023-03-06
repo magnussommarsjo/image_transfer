@@ -57,3 +57,21 @@ def test_move_format(temp_directory: Path):
     assert result.exit_code == 0
     assert (temp_directory / "destination" / "2020" / "01" / "file01.jpg").exists()
     assert not (temp_directory / "source" / "file01.jpg").exists()
+
+
+def test_remove_empty(temp_directory: Path):
+    """Checks that we remove only empty directories"""
+    src_path = temp_directory / "source"
+    dir_to_be_removed = src_path / "to_be_removed" 
+    sub_dir_to_be_removed = dir_to_be_removed / "sub_dir"
+    sub_dir_to_be_removed.mkdir(parents=True)
+    assert sub_dir_to_be_removed.exists()
+
+    result = runner.invoke(app, ["remove", "dirs", str(src_path)])
+
+    assert result.exit_code == 0
+
+    assert not dir_to_be_removed.exists()
+    assert (temp_directory / "source").exists()
+    assert (temp_directory / "source" / "subfolder").exists()
+    assert (temp_directory / "destination").exists()
